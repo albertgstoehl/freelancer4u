@@ -8,10 +8,8 @@ Freelancer4u ist ein vereinfachtes Job-Portal für Freelancer aus dem Bereich So
 ## Datenmodell
 
 Die folgende Abbildung zeigt das fachliche Datenmodell:
-
 ![Datenmodell](assets/datenmodell.drawio.svg)
 ## Use-Case Diagramm
 
 Die folgende Abbildung zeigt das Use-Case Diagramm:
-
 ![Use-Case Diagramm](assets/use-case.drawio.svg)
