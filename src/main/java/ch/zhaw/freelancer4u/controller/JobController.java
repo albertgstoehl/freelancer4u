@@ -2,8 +2,10 @@ package ch.zhaw.freelancer4u.controller;
 
 import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobCreateDTO;
+import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +28,26 @@ public class JobController {
      * @return ResponseEntity mit Array von Job-Objekten
      */
     @GetMapping("/job")
-    public ResponseEntity<List<Job>> getAllJobs() {
-        return ResponseEntity.ok(jobRepository.findAll());
+    public ResponseEntity<List<Job>> getAllJobs(
+            @RequestParam(required = false) Double min,
+            @RequestParam(required = false) JobType type) {
+        
+        try {
+            List<Job> allJobs;
+            if (min != null && type != null) {
+                allJobs = jobRepository.findByEarningsGreaterThanAndJobType(min, type);
+            } else if (min != null) {
+                allJobs = jobRepository.findByEarningsGreaterThan(min);
+            } else if (type != null) {
+                allJobs = jobRepository.findByJobType(type);
+            } else {
+                allJobs = jobRepository.findAll();
+            }
+            
+            return new ResponseEntity<>(allJobs, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     /**
