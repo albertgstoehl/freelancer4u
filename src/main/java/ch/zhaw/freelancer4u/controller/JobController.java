@@ -2,10 +2,10 @@ package ch.zhaw.freelancer4u.controller;
 
 import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobCreateDTO;
+import ch.zhaw.freelancer4u.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ch.zhaw.freelancer4u.service.JobService;
 
 import java.util.List;
 
@@ -13,11 +13,11 @@ import java.util.List;
 @RequestMapping("/api")
 public class JobController {
 
-    private final JobService jobService;
+    private final JobRepository jobRepository;
 
     @Autowired
-    public JobController(JobService jobService) {
-        this.jobService = jobService;
+    public JobController(JobRepository jobRepository) {
+        this.jobRepository = jobRepository;
     }
 
     /**
@@ -27,8 +27,7 @@ public class JobController {
      */
     @GetMapping("/job")
     public ResponseEntity<List<Job>> getAllJobs() {
-        List<Job> jobs = jobService.getAllJobs();
-        return ResponseEntity.ok(jobs);
+        return ResponseEntity.ok(jobRepository.findAll());
     }
 
     /**
@@ -39,7 +38,7 @@ public class JobController {
      */
     @PostMapping("/job")
     public ResponseEntity<Job> createJob(@RequestBody JobCreateDTO jobCreateDTO) {
-        Job createdJob = jobService.createJob(jobCreateDTO);
-        return ResponseEntity.ok(createdJob);
+        Job job = new Job(jobCreateDTO);
+        return ResponseEntity.ok(jobRepository.save(job));
     }
 } 
