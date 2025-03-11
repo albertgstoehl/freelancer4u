@@ -41,4 +41,17 @@ public class JobController {
         Job job = new Job(jobCreateDTO);
         return ResponseEntity.ok(jobRepository.save(job));
     }
+
+    /**
+     * GET /api/job/{id}
+     * Gibt einen spezifischen Job zurück
+     * @param id Die ID des Jobs
+     * @return ResponseEntity mit Job-Objekt oder 404 wenn nicht gefunden
+     */
+    @GetMapping("/job/{id}")
+    public ResponseEntity<Job> getJobById(@PathVariable String id) {
+        return jobRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
 } 
