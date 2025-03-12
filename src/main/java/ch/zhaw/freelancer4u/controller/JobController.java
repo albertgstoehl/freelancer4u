@@ -5,17 +5,16 @@ import ch.zhaw.freelancer4u.model.JobCreateDTO;
 import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class JobController {
-
+    @Autowired
     private final JobRepository jobRepository;
     private final CompanyService companyService;
 
