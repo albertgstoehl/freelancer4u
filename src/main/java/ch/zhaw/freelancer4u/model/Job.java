@@ -6,6 +6,7 @@ import lombok.ToString;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 /**
  * Klasse zur Repräsentation eines Jobs
@@ -24,7 +25,8 @@ public class Job {
     private JobsState jobState = JobsState.NEW;
     private double earnings;
     private String companyId;
-    private String freelancerId = "";
+    @Field(write = Field.Write.ALWAYS)
+    private String freelancerId = null;
 
     /**
      * Konstruktor für Job mit allen Attributen aus dem DTO

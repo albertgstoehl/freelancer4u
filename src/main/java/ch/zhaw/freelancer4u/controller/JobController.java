@@ -4,6 +4,7 @@ import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobCreateDTO;
 import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
+import ch.zhaw.freelancer4u.repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,12 @@ import java.util.List;
 public class JobController {
 
     private final JobRepository jobRepository;
+    private final CompanyRepository companyRepository;
 
     @Autowired
-    public JobController(JobRepository jobRepository) {
+    public JobController(JobRepository jobRepository, CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
+        this.companyRepository = companyRepository;
     }
 
     /**
@@ -58,8 +61,17 @@ public class JobController {
      */
     @PostMapping("/job")
     public ResponseEntity<Job> createJob(@RequestBody JobCreateDTO jobCreateDTO) {
-        Job job = new Job(jobCreateDTO);
-        return ResponseEntity.ok(jobRepository.save(job));
+        try {
+            if (!companyRepository.existsById(jobCreateDTO.getCompanyId())) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            Job job = new Job(jobCreateDTO);
+            Job savedJob = jobRepository.save(job);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedJob);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
