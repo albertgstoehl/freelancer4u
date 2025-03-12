@@ -4,7 +4,7 @@ import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobCreateDTO;
 import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
-import ch.zhaw.freelancer4u.repository.CompanyRepository;
+import ch.zhaw.freelancer4u.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +17,11 @@ import java.util.List;
 public class JobController {
 
     private final JobRepository jobRepository;
-    private final CompanyRepository companyRepository;
+    private final CompanyService companyService;
 
-    @Autowired
-    public JobController(JobRepository jobRepository, CompanyRepository companyRepository) {
+    public JobController(JobRepository jobRepository, CompanyService companyService) {
         this.jobRepository = jobRepository;
-        this.companyRepository = companyRepository;
+        this.companyService = companyService;
     }
 
     /**
@@ -62,15 +61,14 @@ public class JobController {
     @PostMapping("/job")
     public ResponseEntity<Job> createJob(@RequestBody JobCreateDTO jobCreateDTO) {
         try {
-            if (!companyRepository.existsById(jobCreateDTO.getCompanyId())) {
-                return ResponseEntity.badRequest().build();
+            if (!companyService.companyExists(jobCreateDTO.getCompanyId())) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            
             Job job = new Job(jobCreateDTO);
             Job savedJob = jobRepository.save(job);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedJob);
+            return new ResponseEntity<>(savedJob, HttpStatus.CREATED);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -1,8 +1,9 @@
 package ch.zhaw.freelancer4u.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-
 import ch.zhaw.freelancer4u.model.Company;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface  CompanyRepository extends MongoRepository<Company, String> {
+@Repository
+public interface CompanyRepository extends MongoRepository<Company, String> {
 }
