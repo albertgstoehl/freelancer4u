@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -34,5 +35,14 @@ public class JobServiceController {
             return new ResponseEntity<>(job.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("/completejob")
+    public ResponseEntity<Map<String, Object>> completeJob(@RequestBody JobStateChangeDTO jobStateChangeDTO) {
+        Map<String, Object> result = jobService.completJob(
+            jobStateChangeDTO.getJobId(),
+            jobStateChangeDTO.getFreelancerId()
+        );
+        return ResponseEntity.ok(result);
     }
 } 
