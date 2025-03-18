@@ -2,7 +2,9 @@ package ch.zhaw.freelancer4u.repository;
 
 import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobType;
+import ch.zhaw.freelancer4u.model.JobStateAggregationDTO;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -11,4 +13,10 @@ public interface JobRepository extends MongoRepository<Job, String> {
     List<Job> findByEarningsGreaterThan(Double earnings);
     List<Job> findByJobType(JobType type);
     List<Job> findByEarningsGreaterThanAndJobType(Double earnings, JobType jobType);
+
+    @Aggregation({
+        "{'$match': {'companyId': ?0}}",
+        "{'$group': {'_id': '$jobState', 'jobIds': {'$push': '$_id'}, 'count': {'$count': {}}}}"
+    })
+    List<JobStateAggregationDTO> getJobStateAggregation(String companyId);
 } 

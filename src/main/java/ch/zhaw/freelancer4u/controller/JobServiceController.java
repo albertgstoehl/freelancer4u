@@ -2,22 +2,30 @@ package ch.zhaw.freelancer4u.controller;
 
 import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobStateChangeDTO;
+import ch.zhaw.freelancer4u.model.JobStateAggregationDTO;
 import ch.zhaw.freelancer4u.service.JobService;
+import ch.zhaw.freelancer4u.repository.JobRepository;
+import ch.zhaw.freelancer4u.service.CompanyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/service")
 public class JobServiceController {
     
     private final JobService jobService;
+    private final JobRepository jobRepository;
+    private final CompanyService companyService;
 
-    public JobServiceController(JobService jobService) {
+    public JobServiceController(JobService jobService, JobRepository jobRepository, CompanyService companyService) {
         this.jobService = jobService;
+        this.jobRepository = jobRepository;
+        this.companyService = companyService;
     }
 
     /**
@@ -43,6 +51,15 @@ public class JobServiceController {
             jobStateChangeDTO.getJobId(),
             jobStateChangeDTO.getFreelancerId()
         );
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/jobdashboard")
+    public ResponseEntity<List<JobStateAggregationDTO>> getJobStateAggregation(@RequestParam String company) {
+        if (!companyService.companyExists(company)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<JobStateAggregationDTO> result = jobRepository.getJobStateAggregation(company);
         return ResponseEntity.ok(result);
     }
 } 
