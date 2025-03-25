@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ch.zhaw.freelancer4u.model.Company;
 import ch.zhaw.freelancer4u.model.CompanyCreateDTO;
 import ch.zhaw.freelancer4u.repository.CompanyRepository;
+import ch.zhaw.freelancer4u.service.CompanyService;
 
 @RestController
 @RequestMapping("/api")
@@ -23,10 +24,14 @@ public class CompanyController {
     @Autowired
     CompanyRepository companyRepository;
 
+    @Autowired
+    CompanyService companyService;
+
     @PostMapping("/company")
     public ResponseEntity<Company> createCompany(
         @RequestBody CompanyCreateDTO fDTO) {
-        Company fDAO = new Company(fDTO.getName(), fDTO.getEmail());
+        String nextId = companyService.getNextId();
+        Company fDAO = new Company(nextId, fDTO.getName(), fDTO.getEmail());
         Company f = companyRepository.save(fDAO);
         return new ResponseEntity<>(f, HttpStatus.CREATED);
     } 
