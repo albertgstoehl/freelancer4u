@@ -12,7 +12,7 @@
 </script>
 
 <div class="container mt-4">
-    <h1>Account Details</h1>
+    <h1 class="text-danger mb-4">Account Details</h1>
 
     {#if $user}
         <div class="d-flex align-items-start mb-4">
@@ -51,6 +51,17 @@
                 <div class="mb-3">
                     <label class="fw-bold">Last Name:</label>
                     <div>{$user.family_name}</div>
+                </div>
+            {/if}
+
+            {#if $user.user_roles && $user.user_roles.length > 0}
+                <div class="mb-3">
+                    <label class="fw-bold">Roles:</label>
+                    <div class="d-flex gap-2">
+                        {#each $user.user_roles as role}
+                            <span class="badge bg-primary">{role}</span>
+                        {/each}
+                    </div>
                 </div>
             {/if}
         </div>
