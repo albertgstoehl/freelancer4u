@@ -27,11 +27,16 @@
           <li class="nav-item">
             <a class="nav-link" href="/jobs">Jobs</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/account">Account</a>
+          </li>
         {/if}
       </ul>
-      <div class="d-flex">
+      <div class="d-flex align-items-center">
         {#if $isAuthenticated}
-          <span class="navbar-text me-2">{$user?.name}</span>
+          <a href="/account" class="text-decoration-none">
+            <span class="navbar-text me-3">{$user?.name}</span>
+          </a>
           <button type="button" class="btn btn-primary" on:click={auth.logout}>
             Log Out
           </button>

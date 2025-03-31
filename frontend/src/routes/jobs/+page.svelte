@@ -2,7 +2,7 @@
   import axios from "axios";
   import { page } from "$app/state";
   import { onMount } from "svelte";
-
+  import { jwt_token } from "../../store";
   // get the origin of current page, e.g. http://localhost:8080
   const api_root = page.url.origin;
 
@@ -25,7 +25,9 @@
     var config = {
       method: "get",
       url: api_root + "/api/company",
-      headers: {},
+      headers: {
+        "Authorization": "Bearer " + $jwt_token
+      },
     };
 
     axios(config)
@@ -42,7 +44,9 @@
     var config = {
       method: "get",
       url: api_root + "/api/job",
-      headers: {},
+      headers: {
+        "Authorization": "Bearer " + $jwt_token
+      },
     };
 
     axios(config)
@@ -61,6 +65,7 @@
       url: api_root + "/api/job",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Bearer " + $jwt_token
       },
       data: job,
     };
