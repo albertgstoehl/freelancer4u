@@ -17,7 +17,7 @@ import ch.zhaw.freelancer4u.model.Company;
 import ch.zhaw.freelancer4u.model.CompanyCreateDTO;
 import ch.zhaw.freelancer4u.repository.CompanyRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
-
+import ch.zhaw.freelancer4u.service.UserService;
 @RestController
 @RequestMapping("/api")
 public class CompanyController {
@@ -27,9 +27,16 @@ public class CompanyController {
     @Autowired
     CompanyService companyService;
 
+    @Autowired
+    UserService userService;
+
     @PostMapping("/company")
     public ResponseEntity<Company> createCompany(
         @RequestBody CompanyCreateDTO fDTO) {
+        if (!userService.userHasRole("admin")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        
         String nextId = companyService.getNextId();
         Company fDAO = new Company(nextId, fDTO.getName(), fDTO.getEmail());
         Company f = companyRepository.save(fDAO);
