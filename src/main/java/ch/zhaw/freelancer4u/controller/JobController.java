@@ -5,6 +5,7 @@ import ch.zhaw.freelancer4u.model.JobCreateDTO;
 import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
+import ch.zhaw.freelancer4u.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +16,12 @@ import java.util.List;
 @RequestMapping("/api")
 public class JobController {
     @Autowired
-    private final JobRepository jobRepository;
-    private final CompanyService companyService;
+    JobRepository jobRepository;
+    @Autowired
+    CompanyService companyService;
+    @Autowired
+    UserService userService;
 
-    public JobController(JobRepository jobRepository, CompanyService companyService) {
-        this.jobRepository = jobRepository;
-        this.companyService = companyService;
-    }
 
     /**
      * GET /api/job
@@ -59,6 +59,11 @@ public class JobController {
      */
     @PostMapping("/job")
     public ResponseEntity<Job> createJob(@RequestBody JobCreateDTO jobCreateDTO) {
+        // Check if user has admin role
+        if (!userService.userHasRole("admin")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         try {
             if (!companyService.companyExists(jobCreateDTO.getCompanyId())) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

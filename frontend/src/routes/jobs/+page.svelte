@@ -2,7 +2,7 @@
   import axios from "axios";
   import { page } from "$app/state";
   import { onMount } from "svelte";
-
+  import { jwt_token, user } from "../../store";
   // get the origin of current page, e.g. http://localhost:8080
   const api_root = page.url.origin;
 
@@ -25,7 +25,9 @@
     var config = {
       method: "get",
       url: api_root + "/api/company",
-      headers: {},
+      headers: {
+        "Authorization": "Bearer " + $jwt_token
+      },
     };
 
     axios(config)
@@ -42,7 +44,9 @@
     var config = {
       method: "get",
       url: api_root + "/api/job",
-      headers: {},
+      headers: {
+        "Authorization": "Bearer " + $jwt_token
+      },
     };
 
     axios(config)
@@ -61,6 +65,7 @@
       url: api_root + "/api/job",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": "Bearer " + $jwt_token
       },
       data: job,
     };
@@ -77,62 +82,64 @@
   }
 </script>
 
-<h1 class="mt-3">Create Job</h1>
-<form class="mb-5">
-  <div class="row mb-3">
-    <div class="col">
-      <label class="form-label" for="description">Title</label>
-      <input
-        bind:value={job.title}
-        class="form-control"
-        id="description"
-        type="text"
-      />
+{#if $user?.user_roles?.includes("admin")}
+  <h1 class="mt-3">Create Job</h1>
+  <form class="mb-5">
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label" for="description">Title</label>
+        <input
+          bind:value={job.title}
+          class="form-control"
+          id="description"
+          type="text"
+        />
+      </div>
     </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col">
-      <label class="form-label" for="description">Description</label>
-      <input
-        bind:value={job.description}
-        class="form-control"
-        id="description"
-        type="text"
-      />
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label" for="description">Description</label>
+        <input
+          bind:value={job.description}
+          class="form-control"
+          id="description"
+          type="text"
+        />
+      </div>
     </div>
-  </div>
-  <div class="row mb-3">
-    <div class="col">
-      <label class="form-label" for="type">Type</label>
-      <select bind:value={job.jobType} class="form-select" id="type">
-        <option value="OTHER">OTHER</option>
-        <option value="TEST">TEST</option>
-        <option value="IMPLEMENT">IMPLEMENT</option>
-        <option value="REVIEW">REVIEW</option>
-      </select>
+    <div class="row mb-3">
+      <div class="col">
+        <label class="form-label" for="type">Type</label>
+        <select bind:value={job.jobType} class="form-select" id="type">
+          <option value="OTHER">OTHER</option>
+          <option value="TEST">TEST</option>
+          <option value="IMPLEMENT">IMPLEMENT</option>
+          <option value="REVIEW">REVIEW</option>
+        </select>
+      </div>
+      <div class="col">
+        <label class="form-label" for="earnings">Earnings</label>
+        <input
+          bind:value={job.earnings}
+          class="form-control"
+          id="earnings"
+          type="number"
+        />
+      </div>
+      <div class="col">
+        <label class="form-label" for="company">Company</label>
+        <select bind:value={job.companyId} class="form-select" id="company">
+          {#each companies as company}
+            <option value={company.id}>{company.name}</option>
+          {/each}
+        </select>
+      </div>
     </div>
-    <div class="col">
-      <label class="form-label" for="earnings">Earnings</label>
-      <input
-        bind:value={job.earnings}
-        class="form-control"
-        id="earnings"
-        type="number"
-      />
-    </div>
-    <div class="col">
-      <label class="form-label" for="company">Company</label>
-      <select bind:value={job.companyId} class="form-select" id="company">
-        {#each companies as company}
-          <option value={company.id}>{company.name}</option>
-        {/each}
-      </select>
-    </div>
-  </div>
-  <button type="button" class="btn btn-primary" onclick={createJob}
-    >Submit</button
-  >
-</form>
+    <button type="button" class="btn btn-primary" onclick={createJob}
+      >Submit</button
+    >
+  </form>
+{/if}
 
 <h1>All Jobs</h1>
 <table class="table">
