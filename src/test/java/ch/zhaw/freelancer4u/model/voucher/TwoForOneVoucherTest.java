@@ -7,8 +7,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import ch.zhaw.freelancer4u.model.Job;
 import ch.zhaw.freelancer4u.model.JobType;
@@ -83,11 +83,11 @@ public class TwoForOneVoucherTest {
         int count = args.getInteger(0);
         double expectedDiscount = args.getDouble(1);
         
-        TwoForOneVoucher voucher = new TwoForOneVoucher(JobType.DESIGN);
+        TwoForOneVoucher voucher = new TwoForOneVoucher(JobType.OTHER);
         
         List<Job> jobs = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            jobs.add(createJob("Design Task " + i, 77.0, JobType.DESIGN));
+            jobs.add(createJob("Design Task " + i, 77.0, JobType.OTHER));
         }
         
         double discount = voucher.getDiscount(jobs);
