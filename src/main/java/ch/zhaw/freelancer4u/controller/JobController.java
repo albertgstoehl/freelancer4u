@@ -88,4 +88,19 @@ public class JobController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+
+    /**
+     * DELETE /api/job/{id}
+     * Löscht einen spezifischen Job (nur für Admin-Rolle)
+     * @param id Die ID des Jobs
+     * @return ResponseEntity mit Statuscode 200 mit Body "DELETED" wenn gelöscht, oder 403 wenn keine Admin-Rolle
+     */
+    @DeleteMapping("/job/{id}")
+    public ResponseEntity<String> deleteJobById(@PathVariable String id) {
+        if (!userService.userHasRole("admin")) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        jobRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("DELETED");
+    }
 } 

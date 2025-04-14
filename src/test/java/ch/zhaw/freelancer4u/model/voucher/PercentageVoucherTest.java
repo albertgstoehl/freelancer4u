@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -60,5 +64,55 @@ public class PercentageVoucherTest {
         job.setCompanyId("company123");
         job.setEarnings(earnings);
         return job;
+    }
+    
+    @Test
+    public void testPercentageGreaterThan50() {
+        // Test creating voucher with percentage > 50
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            new PercentageVoucher(51.0);
+        });
+        
+        assertEquals("Error: Discount value must less or equal 50.", exception.getMessage());
+    }
+    
+    @Test
+    public void testPercentageLessThanOrEqualToZero() {
+        // Test creating voucher with percentage = 0
+        RuntimeException exceptionZero = assertThrows(RuntimeException.class, () -> {
+            new PercentageVoucher(0.0);
+        });
+        
+        assertEquals("Error: Discount value must be greater zero.", exceptionZero.getMessage());
+        
+        // Test creating voucher with negative percentage
+        RuntimeException exceptionNegative = assertThrows(RuntimeException.class, () -> {
+            new PercentageVoucher(-10.0);
+        });
+        
+        assertEquals("Error: Discount value must be greater zero.", exceptionNegative.getMessage());
+    }
+    
+    @Test
+    public void testTwoJobsWithMockito() {
+        // Create a new voucher with 20% discount
+        PercentageVoucher voucher = new PercentageVoucher(20.0);
+        
+        // Create mock jobs
+        Job mockedJob1 = mock(Job.class);
+        Job mockedJob2 = mock(Job.class);
+        
+        // Set up the mock behavior
+        when(mockedJob1.getEarnings()).thenReturn(42.0);
+        when(mockedJob2.getEarnings()).thenReturn(77.0);
+        
+        // Create list with the mocked jobs
+        List<Job> jobs = Arrays.asList(mockedJob1, mockedJob2);
+        
+        // Calculate the discount
+        double discount = voucher.getDiscount(jobs);
+        
+        // Expected: 20% of (42.0 + 77.0) = 20% of 119.0 = 23.8
+        assertEquals(23.8, discount, 0.001);
     }
 }

@@ -8,6 +8,12 @@ public class PercentageVoucher implements Voucher {
     private final double percentage;
     
     public PercentageVoucher(double percentage) {
+        if (percentage > 50) {
+            throw new RuntimeException("Error: Discount value must less or equal 50.");
+        }
+        if (percentage <= 0) {
+            throw new RuntimeException("Error: Discount value must be greater zero.");
+        }
         this.percentage = percentage;
     }
     
