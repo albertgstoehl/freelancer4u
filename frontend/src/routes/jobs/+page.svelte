@@ -262,7 +262,7 @@
         <td>{job.jobState}</td>
         <td>{job.companyId}</td>
         <td>
-          {#if $isAuthenticated && job.jobState === 'AVAILABLE'}
+          {#if $isAuthenticated && job.jobState === 'NEW'}
             <button class="btn btn-success btn-sm" onclick={() => assignToMe(job.id)}>
               Assign to me
             </button>
