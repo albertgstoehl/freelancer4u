@@ -7,6 +7,7 @@ target/
 
 frontend/node_modules
 frontend/.svelte-kit
+node_modules/
 
 ### STS ###
 .apt_generated

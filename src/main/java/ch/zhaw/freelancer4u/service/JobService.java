@@ -19,14 +19,14 @@ public class JobService {
         // 1. Prüfen ob Job existiert
         Optional<Job> jobOptional = jobRepository.findById(jobId);
         if (jobOptional.isEmpty()) {
-            return Optional.empty();
+            return Optional.empty(); // Job not found
         }
 
         Job job = jobOptional.get();
         
         // 2. Prüfen ob Job im Zustand NEW ist
         if (job.getJobState() != JobsState.NEW) {
-            return Optional.empty();
+            return Optional.empty(); // Job not in correct state
         }
 
         // 3. Job zuweisen
@@ -39,29 +39,41 @@ public class JobService {
         // 5. Aktualisierter Job zurückgeben
             return Optional.of(updatedJob);
         } catch (Exception e) {
-            return Optional.empty();
+            // Log exception maybe?
+            return Optional.empty(); // Error during save
         }
     }
 
-    public Map<String, Object> completJob(String jobId, String freelancerId) {
-        Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job not found"));
-
-        if (job.getJobState() != JobsState.ASSIGNED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job is not in ASSIGNED state");
+    public Optional<Job> completeJob(String jobId, String freelancerId) {
+        Optional<Job> jobOptional = jobRepository.findById(jobId);
+        if (jobOptional.isEmpty()) {
+            // Job not found
+            return Optional.empty();
         }
 
-        if (!job.getFreelancerId().equals(freelancerId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job is not assigned to this freelancer");
+        Job job = jobOptional.get();
+
+        if (job.getJobState() != JobsState.ASSIGNED) {
+            // Job is not in ASSIGNED state
+            return Optional.empty();
+        }
+
+        if (freelancerId == null || job.getFreelancerId() == null || !job.getFreelancerId().equals(freelancerId)) {
+            // Job is not assigned to this freelancer, or freelancerId provided is null
+            // Note: The check `job.getFreelancerId().equals(freelancerId)` implies freelancerId should not be null.
+            // If an admin *can* complete a job without providing the correct freelancerId, this logic needs changing.
+            // Assuming for now it must match.
+            return Optional.empty();
         }
 
         job.setJobState(JobsState.DONE);
-        jobRepository.save(job);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("jobState", "DONE");
-        response.put("companyId", job.getCompanyId());
-        response.put("freelancerId", job.getFreelancerId());
-        return response;
+        try {
+            Job savedJob = jobRepository.save(job); // Save the updated job
+            return Optional.of(savedJob); // Return the updated job wrapped in Optional
+        } catch (Exception e) {
+            // Log exception?
+            return Optional.empty(); // Error during save
+        }
     }
 }

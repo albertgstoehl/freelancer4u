@@ -6,11 +6,14 @@ import ch.zhaw.freelancer4u.model.JobType;
 import ch.zhaw.freelancer4u.repository.JobRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
 import ch.zhaw.freelancer4u.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -25,30 +28,40 @@ public class JobController {
 
     /**
      * GET /api/job
-     * Gibt die Liste aller Jobs zurück
-     * @return ResponseEntity mit Array von Job-Objekten
+     * Gibt die Liste aller Jobs zurück, optional gefiltert und paginiert.
+     * @param min Optional: minimaler Verdienst
+     * @param type Optional: Job-Typ
+     * @param pageNumber Optional: Seitennummer (1-basiert)
+     * @param pageSize Optional: Anzahl Elemente pro Seite
+     * @return ResponseEntity mit Page<Job>-Objekt
      */
     @GetMapping("/job")
-    public ResponseEntity<List<Job>> getAllJobs(
+    public ResponseEntity<Page<Job>> getAllJobs(
             @RequestParam(required = false) Double min,
-            @RequestParam(required = false) JobType type) {
-        
-        try {
-            List<Job> allJobs;
+            @RequestParam(required = false) JobType type,
+            @RequestParam(required = false, defaultValue = "1") Integer pageNumber,
+            @RequestParam(required = false, defaultValue = "5") Integer pageSize) {
+
+        Page<Job> allJobs;
+
+        int effectivePageNumber = Math.max(0, pageNumber - 1);
+        pageSize = Math.max(1, pageSize);
+
+        if (min == null && type == null) {
+            allJobs = jobRepository.findAll(PageRequest.of(effectivePageNumber, pageSize));
+        } else {
             if (min != null && type != null) {
-                allJobs = jobRepository.findByEarningsGreaterThanAndJobType(min, type);
+                allJobs = jobRepository.findByJobTypeAndEarningsGreaterThan(type, min,
+                        PageRequest.of(effectivePageNumber, pageSize));
             } else if (min != null) {
-                allJobs = jobRepository.findByEarningsGreaterThan(min);
-            } else if (type != null) {
-                allJobs = jobRepository.findByJobType(type);
+                allJobs = jobRepository.findByEarningsGreaterThan(min,
+                        PageRequest.of(effectivePageNumber, pageSize));
             } else {
-                allJobs = jobRepository.findAll();
+                allJobs = jobRepository.findByJobType(type, PageRequest.of(effectivePageNumber, pageSize));
             }
-            
-            return new ResponseEntity<>(allJobs, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        return new ResponseEntity<>(allJobs, HttpStatus.OK);
     }
 
     /**
@@ -84,9 +97,12 @@ public class JobController {
      */
     @GetMapping("/job/{id}")
     public ResponseEntity<Job> getJobById(@PathVariable String id) {
-        return jobRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        Optional<Job> optJob = jobRepository.findById(id);
+        if (optJob.isPresent()) {
+            return new ResponseEntity<>(optJob.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

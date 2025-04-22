@@ -7,6 +7,10 @@
   // get the origin of current page, e.g. http://localhost:8080
   const api_root = page.url.origin;
 
+  let currentPage = $state(1);
+  let nrOfPages = $state(0);
+  let defaultPageSize = $state(20);
+
   let companies = $state([]);
   let company = $state({
     name: null,
@@ -17,10 +21,16 @@
     getCompanies();
   });
 
+  function changePage(pageNr) {
+      currentPage = pageNr;
+      getCompanies();
+  }
+
   function getCompanies() {
+    let query = `?pageSize=${defaultPageSize}&pageNumber=${currentPage}`;
     var config = {
       method: "get",
-      url: api_root + "/api/company",
+      url: api_root + "/api/company" + query, // Add query parameters
       headers: {
         "Authorization": "Bearer " + $jwt_token
       },
@@ -28,7 +38,8 @@
 
     axios(config)
       .then(function (response) {
-        companies = response.data;
+        companies = response.data.content; // Access content property
+        nrOfPages = response.data.totalPages; // Get total pages
       })
       .catch(function (error) {
         alert("Could not get companies");
@@ -107,4 +118,29 @@
     {/each}
   </tbody>
 </table>
+
+<nav aria-label="Company pagination">
+    <ul class="pagination">
+        {#each { length: nrOfPages } as _, i}
+            <li class="page-item" class:active={currentPage === i + 1}>
+                <button class="page-link" onclick={() => changePage(i + 1)}>
+                    {i + 1}
+                </button>
+            </li>
+        {/each}
+    </ul>
+</nav>
+
+<style>
+.page-link:focus {
+    box-shadow: none;
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
 
