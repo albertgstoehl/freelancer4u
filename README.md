@@ -1,3 +1,7 @@
+![Workflow](https://github.com/albertgstoehl/freelancer4u/actions/workflows/ci-badge.yml/badge.svg)
+![Coverage](https://github.com/albergstoehl/freelancer4u/blob/main/.github/badges/jacoco.svg)
+![Branches](https://github.com/albergstoehl/freelancer4uFS25/blob/main/.github/badges/branches.svg)
+
 # Freelancer4u
 
 Freelancer4u ist ein vereinfachtes Job-Portal für Freelancer aus dem Bereich Softwareentwicklung. Es werden zwei Rollen unterschieden:
