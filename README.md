@@ -1,6 +1,6 @@
 ![Workflow](https://github.com/albertgstoehl/freelancer4u/actions/workflows/ci-badge.yml/badge.svg)
-![Coverage](https://github.com/albergstoehl/freelancer4u/blob/main/.github/badges/jacoco.svg)
-![Branches](https://github.com/albergstoehl/freelancer4uFS25/blob/main/.github/badges/branches.svg)
+![Coverage](https://raw.githubusercontent.com/albertgstoehl/freelancer4u/refs/heads/main/.github/badges/jacoco.svg)
+![Branches](https://raw.githubusercontent.com/albertgstoehl/freelancer4u/refs/heads/main/.github/badges/branches.svg)
 
 # Freelancer4u
 
