@@ -26,6 +26,8 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: mvn clean install
 
       - name: Run tests with JaCoCo
