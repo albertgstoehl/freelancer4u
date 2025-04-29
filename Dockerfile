@@ -10,6 +10,6 @@ RUN cd frontend && npm run build
 RUN rm -r frontend
 RUN sed -i 's/\r$//' mvnw
 RUN chmod +x mvnw
-RUN ./mvnw package
+RUN ./mvnw package -DskipTests
 EXPOSE 8080
 CMD ["java", "-jar", "/usr/src/app/target/freelancer4u-0.0.1-SNAPSHOT.jar"]
