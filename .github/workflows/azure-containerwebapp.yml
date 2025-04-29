@@ -5,7 +5,7 @@ name: Build and deploy a container to an Azure Web App
 env:
   # Set the name of the Azure Web App to deploy to.
   # IMPORTANT: Replace '[ihr ZHAW-Kürzel]' with your actual ZHAW abbreviation.
-  AZURE_WEBAPP_NAME: zhaw-exercise-[gstoealb
+  AZURE_WEBAPP_NAME: zhaw-exercise-gstoealb
 
 # Triggers for the workflow
 on:
