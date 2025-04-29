@@ -1,0 +1,94 @@
+# Workflow name
+name: Build and deploy a container to an Azure Web App
+
+# Environment variables available to all jobs and steps in the workflow
+env:
+  # Set the name of the Azure Web App to deploy to.
+  # IMPORTANT: Replace '[ihr ZHAW-Kürzel]' with your actual ZHAW abbreviation.
+  AZURE_WEBAPP_NAME: zhaw-exercise-[gstoealb
+
+# Triggers for the workflow
+on:
+  # Run on pushes to any branch
+  push:
+  # Allow manual triggering from the GitHub Actions UI
+  workflow_dispatch:
+
+# Permissions required for the workflow jobs
+permissions:
+  contents: read    # Needed to check out the repository code
+  packages: write   # Needed to push the Docker image to GitHub Container Registry (ghcr.io)
+
+# Define the jobs to be executed
+jobs:
+  # --- Build Job ---
+  # This job builds the Docker image and pushes it to the GitHub Container Registry.
+  build:
+    # Runner environment
+    runs-on: ubuntu-latest
+    # Steps to execute in the build job
+    steps:
+      # 1. Check out the repository code
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      # 2. Set up Docker Buildx for multi-platform builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      # 3. Log in to GitHub Container Registry
+      - name: Log in to GitHub container registry
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}      # Use the GitHub username running the action
+          password: ${{ github.token }}     # Use the automatically generated GITHUB_TOKEN
+
+      # 4. Convert repository name to lowercase for Docker tagging consistency
+      - name: Lowercase the repo name and username
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      # 5. Build the Docker image and push it to GitHub Container Registry
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true                         # Push the image after building
+          # Tag the image with the GitHub SHA commit hash
+          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          # Specify the Dockerfile location
+          file: ./Dockerfile
+          # Specify target platforms for the build (optional, but good practice)
+          platforms: linux/amd64 #,linux/arm64 # Add arm64 if needed
+
+  # --- Deploy Job ---
+  # This job deploys the built Docker image to the Azure Web App.
+  deploy:
+    # Permissions for the deploy job (none needed for contents)
+    permissions:
+      contents: none
+    # Runner environment
+    runs-on: ubuntu-latest
+    # This job depends on the 'build' job completing successfully
+    needs: build
+    # Specify the deployment environment (optional, for organization and protection rules)
+    environment:
+      name: 'Development' # Or 'Production', 'Staging', etc.
+      # Set the URL that will be displayed for the environment in GitHub
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    # Steps to execute in the deploy job
+    steps:
+      # 1. Convert repository name to lowercase (needed again as it's a separate job)
+      - name: Lowercase the repo name and username
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      # 2. Deploy the image to Azure Web App using the azure/webapps-deploy action
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp # Give the step an ID to reference its outputs
+        uses: azure/webapps-deploy@v2
+        with:
+          # The name of the Azure Web App
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          # Use the publish profile secret stored in GitHub repository secrets
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          # Specify the Docker image to deploy (using the tag from the build job)
+          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
