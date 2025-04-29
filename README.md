@@ -1,4 +1,4 @@
-![Workflow](https://github.com/albertgstoehl/freelancer4u/actions/workflows/ci-badge.yml/badge.svg)
+![Workflow](https://github.com/albertgstoehl/freelancer4u/actions/workflows/ci.yml/badge.svg)
 ![Coverage](https://raw.githubusercontent.com/albertgstoehl/freelancer4u/refs/heads/main/.github/badges/jacoco.svg)
 ![Branches](https://raw.githubusercontent.com/albertgstoehl/freelancer4u/refs/heads/main/.github/badges/branches.svg)
 
