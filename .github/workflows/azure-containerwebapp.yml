@@ -51,6 +51,8 @@ jobs:
       # 5. Build the Docker image and push it to GitHub Container Registry
       - name: Build and push container image to registry
         uses: docker/build-push-action@v2
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         with:
           push: true                         # Push the image after building
           # Tag the image with the GitHub SHA commit hash
