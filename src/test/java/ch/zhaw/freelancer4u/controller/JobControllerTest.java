@@ -21,14 +21,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -48,6 +52,9 @@ public class JobControllerTest {
     @Mock
     private UserService userService;
 
+    @MockitoBean(answers = Answers.RETURNS_DEEP_STUBS)
+    private OpenAiChatModel chatModel;
+
     @InjectMocks
     private JobController jobController;
 
@@ -57,6 +64,7 @@ public class JobControllerTest {
     private JobCreateDTO jobCreateDTO;
     private Job testJob;
     private String testJobId = "123e4567-e89b-12d3-a456-426614174000";
+    private static final String TEST_TITLE = "Mocked AI Title"; // Für die AI Mock-Antwort
 
     @BeforeEach
     public void setup() {
@@ -78,6 +86,14 @@ public class JobControllerTest {
         testJob.setJobState(JobsState.NEW);
     }
 
+    @BeforeEach
+    void setupMockAiResponse() {
+        when(chatModel.call(any(Prompt.class))
+            .getResult()
+            .getOutput()
+            .getText()).thenReturn(TEST_TITLE);
+    }
+
     /**
      * Test sequence 1: Create a new job (POST)
      */
@@ -86,7 +102,12 @@ public class JobControllerTest {
         // Setup mocks
         when(userService.userHasRole("admin")).thenReturn(true);
         when(companyService.companyExists(any())).thenReturn(true);
-        when(jobRepository.save(any(Job.class))).thenReturn(testJob);
+        jobCreateDTO.setTitle(TEST_TITLE); // Sicherstellen, dass das DTO den gemockten Titel hat
+        Job jobWithMockedTitle = new Job(jobCreateDTO);
+        jobWithMockedTitle.setId(testJobId);
+        jobWithMockedTitle.setJobState(JobsState.NEW);
+
+        when(jobRepository.save(any(Job.class))).thenReturn(jobWithMockedTitle);
 
         // Perform test
         mockMvc
@@ -98,6 +119,7 @@ public class JobControllerTest {
             )
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id", is(testJobId)))
+            .andExpect(jsonPath("$.title", is(TEST_TITLE)))
             .andExpect(
                 jsonPath("$.description", is(jobCreateDTO.getDescription()))
             )

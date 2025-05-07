@@ -32,6 +32,9 @@
           <li class="nav-item">
             <a class="nav-link" href="/account">Account</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/chat">💬 Chat</a>
+          </li>
         {/if}
       </ul>
       <div class="d-flex align-items-center">
