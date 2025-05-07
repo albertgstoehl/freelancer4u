@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import ch.zhaw.freelancer4u.model.Job;
+import ch.zhaw.freelancer4u.model.JobCreateDTO;
 import ch.zhaw.freelancer4u.model.JobType;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +38,13 @@ public class CreateRandomJobsControllerTest {
     @Test
     public void testRandomJob_Success() {
         // Arrange
-        var job = new Job("title", "desc1", JobType.IMPLEMENT, 50.0, "");
+        JobCreateDTO jobCreateDTO = new JobCreateDTO();
+        jobCreateDTO.setTitle("title");
+        jobCreateDTO.setDescription("desc1");
+        jobCreateDTO.setJobType(JobType.IMPLEMENT);
+        jobCreateDTO.setEarnings(50.0);
+        jobCreateDTO.setCompanyId("");
+        var job = new Job(jobCreateDTO);
 
         when(chatClient.prompt("Create a random job")).thenReturn(requestSpec);
         when(requestSpec.call()).thenReturn(responseSpec);
@@ -64,10 +71,31 @@ public class CreateRandomJobsControllerTest {
     @Test
     public void testRandomJobs_Success() {
         // Arrange
-        List<Job> expectedJobs = List.of(
-                new Job("Job 1", "Description 1", JobType.OTHER, 100.0, ""),
-                new Job("Job 2", "Description 2", JobType.IMPLEMENT, 200.0, ""),
-                new Job("Job 3", "Description 3", JobType.TEST, 150.0, ""));
+        JobCreateDTO dto1 = new JobCreateDTO();
+        dto1.setTitle("Job 1");
+        dto1.setDescription("Description 1");
+        dto1.setJobType(JobType.OTHER);
+        dto1.setEarnings(100.0);
+        dto1.setCompanyId("");
+        Job job1 = new Job(dto1);
+
+        JobCreateDTO dto2 = new JobCreateDTO();
+        dto2.setTitle("Job 2");
+        dto2.setDescription("Description 2");
+        dto2.setJobType(JobType.IMPLEMENT);
+        dto2.setEarnings(200.0);
+        dto2.setCompanyId("");
+        Job job2 = new Job(dto2);
+
+        JobCreateDTO dto3 = new JobCreateDTO();
+        dto3.setTitle("Job 3");
+        dto3.setDescription("Description 3");
+        dto3.setJobType(JobType.TEST);
+        dto3.setEarnings(150.0);
+        dto3.setCompanyId("");
+        Job job3 = new Job(dto3);
+
+        List<Job> expectedJobs = List.of(job1, job2, job3);
 
         ParameterizedTypeReference<List<Job>> typeRef = new ParameterizedTypeReference<List<Job>>() {
         };
