@@ -9,6 +9,8 @@ frontend/node_modules
 frontend/.svelte-kit
 node_modules/
 
+.env
+
 ### STS ###
 .apt_generated
 .classpath
