@@ -1,34 +1,43 @@
 package ch.zhaw.freelancer4u.controller;
 
 import ch.zhaw.freelancer4u.model.Job;
-import ch.zhaw.freelancer4u.model.JobStateChangeDTO;
 import ch.zhaw.freelancer4u.model.JobStateAggregationDTO;
-import ch.zhaw.freelancer4u.service.JobService;
+import ch.zhaw.freelancer4u.model.JobStateChangeDTO;
+import ch.zhaw.freelancer4u.model.Mail;
 import ch.zhaw.freelancer4u.repository.JobRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
+import ch.zhaw.freelancer4u.service.JobService;
+import ch.zhaw.freelancer4u.service.MailService;
 import ch.zhaw.freelancer4u.service.UserService;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/service")
 public class JobServiceController {
-    
+
     private final JobService jobService;
     private final JobRepository jobRepository;
     private final CompanyService companyService;
     private final UserService userService;
+    private final MailService mailService;
 
-    public JobServiceController(JobService jobService, JobRepository jobRepository, CompanyService companyService, UserService userService) {
+    public JobServiceController(
+        JobService jobService,
+        JobRepository jobRepository,
+        CompanyService companyService,
+        UserService userService,
+        MailService mailService
+    ) {
         this.jobService = jobService;
         this.jobRepository = jobRepository;
         this.companyService = companyService;
         this.userService = userService;
+        this.mailService = mailService;
     }
 
     /**
@@ -38,7 +47,9 @@ public class JobServiceController {
      * @return ResponseEntity mit aktualisiertem Job oder FORBIDDEN/BAD_REQUEST
      */
     @PutMapping("/assignjob")
-    public ResponseEntity<Job> assignJob(@RequestBody JobStateChangeDTO changes) {
+    public ResponseEntity<Job> assignJob(
+        @RequestBody JobStateChangeDTO changes
+    ) {
         if (!userService.userHasRole("admin")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -59,7 +70,9 @@ public class JobServiceController {
      * @return ResponseEntity mit aktualisiertem Job oder FORBIDDEN/BAD_REQUEST
      */
     @PutMapping("/completejob")
-    public ResponseEntity<Job> completeJob(@RequestBody JobStateChangeDTO changes) {
+    public ResponseEntity<Job> completeJob(
+        @RequestBody JobStateChangeDTO changes
+    ) {
         if (!userService.userHasRole("admin")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -81,11 +94,14 @@ public class JobServiceController {
     }
 
     @GetMapping("/jobdashboard")
-    public ResponseEntity<List<JobStateAggregationDTO>> getJobStateAggregation(@RequestParam String company) {
+    public ResponseEntity<List<JobStateAggregationDTO>> getJobStateAggregation(
+        @RequestParam String company
+    ) {
         if (!companyService.companyExists(company)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<JobStateAggregationDTO> result = jobRepository.getJobStateAggregation(company);
+        List<JobStateAggregationDTO> result =
+            jobRepository.getJobStateAggregation(company);
         return ResponseEntity.ok(result);
     }
 
@@ -106,6 +122,25 @@ public class JobServiceController {
 
         Optional<Job> job = jobService.assignJob(jobId, userEmail);
         if (job.isPresent()) {
+            // Send confirmation email
+            Mail mail = new Mail();
+            mail.setTo(userEmail);
+            mail.setSubject("Job Assignment Confirmation");
+            mail.setMessage(
+                "Dear Freelancer,\n\n" +
+                "You have been assigned to job " +
+                job.get().getId() +
+                ": " +
+                job.get().getTitle() +
+                ".\n\n" +
+                "Current status: " +
+                job.get().getJobState() +
+                "\n\n" +
+                "Thank you for using our platform!\n" +
+                "Freelancer4U Team"
+            );
+            mailService.sendMail(mail);
+
             return new ResponseEntity<>(job.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -127,9 +162,28 @@ public class JobServiceController {
         Optional<Job> job = jobService.completeJob(jobId, userEmail);
 
         if (job.isPresent()) {
+            // Send job completion email
+            Mail mail = new Mail();
+            mail.setTo(userEmail);
+            mail.setSubject("Job Completion Confirmation");
+            mail.setMessage(
+                "Dear Freelancer,\n\n" +
+                "You have successfully completed job " +
+                job.get().getId() +
+                ": " +
+                job.get().getTitle() +
+                ".\n\n" +
+                "Current status: " +
+                job.get().getJobState() +
+                "\n\n" +
+                "Thank you for your work!\n" +
+                "Freelancer4U Team"
+            );
+            mailService.sendMail(mail);
+
             return new ResponseEntity<>(job.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
-} 
+}

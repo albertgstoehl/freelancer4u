@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ch.zhaw.freelancer4u.model.Company;
 import ch.zhaw.freelancer4u.model.CompanyCreateDTO;
+import ch.zhaw.freelancer4u.model.MailInformation;
 import ch.zhaw.freelancer4u.repository.CompanyRepository;
 import ch.zhaw.freelancer4u.service.CompanyService;
+import ch.zhaw.freelancer4u.service.MailValidatorService;
 import ch.zhaw.freelancer4u.service.UserService;
 @RestController
 @RequestMapping("/api")
@@ -32,12 +34,21 @@ public class CompanyController {
 
     @Autowired
     UserService userService;
+    
+    @Autowired
+    MailValidatorService mailValidatorService;
 
     @PostMapping("/company")
     public ResponseEntity<Company> createCompany(
         @RequestBody CompanyCreateDTO fDTO) {
         if (!userService.userHasRole("admin")) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        
+        // Validate email
+        MailInformation mailInfo = mailValidatorService.validateEmail(fDTO.getEmail());
+        if (!mailInfo.isFormat() || mailInfo.isDisposable() || !mailInfo.isDns()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         
         String nextId = companyService.getNextId();
